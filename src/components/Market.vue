@@ -1,76 +1,104 @@
 <template>
-  <div class="wrap">
-    <h1>{{ msg }}-{{markShow}}</h1>
-    <div class="wrap-layer" :style="{
-      width: previewDocument.width + 'px',
-      height: previewDocument.height + 'px',
-      background: 'url(' + previewUrl + ') no-repeat',
-      position: 'relative'}">
-      <!-- 创建选中图层的标注 -->
-      <div id="sketch-marker" class="sketch-marker" :style="{
-        visibility: markShow ? 'visible' : 'hidden',
-        width: clickData.width + 'px',
-        height: clickData.height + 'px',
-        top: clickData.top + 'px',
-        left: clickData.left + 'px'}">
-        <b class="skm-w" :w="clickData.width + 'px'"></b><b class="skm-h" :h="clickData.height + 'px'"></b><span class="skm-tl"></span><span
-          class="skm-tr"></span><span class="skm-bl"></span><span class="skm-br"></span></div>
-      <!-- 创建虚线导航灯塔 -->
-      <div id="skl-top" class="skl-top" :style="{
-        display: markShow ? 'block' : 'none',
-        top: clickData.top + 'px',
-        width: previewDocument.width + 'px'}"></div>
-      <div id="skl-bottom" class="skl-bottom" :style="{
-        display: markShow ? 'block' : 'none',
-        top: clickData.top + clickData.height + 'px',
-        width: previewDocument.width + 'px'}"></div>
-      <div id="skl-left" class="skl-left" :style="{
-        display: markShow ? 'block' : 'none',
-        left: clickData.left + 'px', 
-        height: previewDocument.height + 'px'}"></div>
-      <div id="skl-right" class="skl-right" :style="{
-        display: markShow ? 'block' : 'none',
-        left: clickData.left + clickData.width + 'px', 
-        height: previewDocument.height + 'px'}"></div>
-      <!-- 2个图层之间的标尺 -->
-      <div id="skm-r-top" class="skm-rule skm-r-top" v-if="moveData.moveData" :style="{
-        visibility: markShow && this.markData.top.visible ? 'visible' : 'hidden',
-        left: markData.top.left + 'px',
-        top: markData.top.top + 'px',
-        height: markData.top.height + 'px'}"><span>{{markData.top.text}}px</span></div>
-      <div id="skm-r-right" class="skm-rule skm-r-right" :style="{
-        visibility: markShow && this.markData.right.visible ? 'visible' : 'hidden',
-        top: markData.right.top + 'px',
-        left: markData.right.left + 'px',
-        width: markData.right.width + 'px'}"><span>{{markData.right.text}}px</span></div>
-      <div id="skm-r-bottom" class="skm-rule skm-r-bottom" :style="{
-        visibility: markShow && this.markData.bottom.visible ? 'visible' : 'hidden',
-        left: markData.bottom.left + 'px',
-        top: markData.bottom.top + 'px',
-        height: markData.bottom.height + 'px'}"><span>{{markData.bottom.text}}px</span></div>
-      <div id="skm-r-left" class="skm-rule skm-r-left" :style="{
-        visibility: markShow && this.markData.top.visible ? 'visible' : 'hidden',
-        top: markData.left.top + 'px',
-        left: markData.left.left + 'px',
-        width: markData.left.width + 'px'}"><span>{{markData.left.text}}px</span></div>
-      <!-- 图层 -->
-      <div class="art-layer" v-if="item.visible" v-for="(item, index) in tree" :key="item.index" :style="{
-        width: item.width + 'px',
-        height: item.height + 'px',
-        left: item.left + 'px',
-        top: item.top + 'px',
-        position: 'absolute',
-        zIndex: tree.length - index}" @click.stop="chooseNow(item)" @mouseover.stop="moveNow(item)">
-        {{index}}
+  <div class="artboard">
+    <div class="wrap ">
+      <h1>{{ msg }}-{{markShow}}</h1>
+      <!-- 预览图显示 宽度多加右侧属性面板宽度 -->
+      <div class="wrap-layer" :style="{
+        width: previewDocument.width + 220 + 'px',
+        height: previewDocument.height + 'px',
+        background: 'url(' + previewUrl + ') no-repeat',
+        position: 'relative'}">
+        <!-- 创建选中图层的标注 -->
+        <div id="sketch-marker" class="sketch-marker" :style="{
+          visibility: markShow ? 'visible' : 'hidden',
+          width: clickData.width + 'px',
+          height: clickData.height + 'px',
+          top: clickData.top + 'px',
+          left: clickData.left + 'px'}">
+          <b class="skm-w" :w="clickData.width + 'px'"></b><b class="skm-h" :h="clickData.height + 'px'"></b><span class="skm-tl"></span><span
+            class="skm-tr"></span><span class="skm-bl"></span><span class="skm-br"></span></div>
+        <!-- 创建虚线导航灯塔 -->
+        <div id="skl-top" class="skl-top" :style="{
+          display: markShow ? 'block' : 'none',
+          top: clickData.top + 'px',
+          width: previewDocument.width + 'px'}"></div>
+        <div id="skl-bottom" class="skl-bottom" :style="{
+          display: markShow ? 'block' : 'none',
+          top: clickData.top + clickData.height + 'px',
+          width: previewDocument.width + 'px'}"></div>
+        <div id="skl-left" class="skl-left" :style="{
+          display: markShow ? 'block' : 'none',
+          left: clickData.left + 'px', 
+          height: previewDocument.height + 'px'}"></div>
+        <div id="skl-right" class="skl-right" :style="{
+          display: markShow ? 'block' : 'none',
+          left: clickData.left + clickData.width + 'px', 
+          height: previewDocument.height + 'px'}"></div>
+        <!-- 2个图层之间的标尺 -->
+        <div id="skm-r-top" class="skm-rule skm-r-top" v-if="moveData.moveData" :style="{
+          visibility: markShow && this.markData.top.visible ? 'visible' : 'hidden',
+          left: markData.top.left + 'px',
+          top: markData.top.top + 'px',
+          height: markData.top.height + 'px'}"><span>{{markData.top.text}}px</span></div>
+        <div id="skm-r-right" class="skm-rule skm-r-right" :style="{
+          visibility: markShow && this.markData.right.visible ? 'visible' : 'hidden',
+          top: markData.right.top + 'px',
+          left: markData.right.left + 'px',
+          width: markData.right.width + 'px'}"><span>{{markData.right.text}}px</span></div>
+        <div id="skm-r-bottom" class="skm-rule skm-r-bottom" :style="{
+          visibility: markShow && this.markData.bottom.visible ? 'visible' : 'hidden',
+          left: markData.bottom.left + 'px',
+          top: markData.bottom.top + 'px',
+          height: markData.bottom.height + 'px'}"><span>{{markData.bottom.text}}px</span></div>
+        <div id="skm-r-left" class="skm-rule skm-r-left" :style="{
+          visibility: markShow && this.markData.top.visible ? 'visible' : 'hidden',
+          top: markData.left.top + 'px',
+          left: markData.left.left + 'px',
+          width: markData.left.width + 'px'}"><span>{{markData.left.text}}px</span></div>
+        <!-- 图层 -->
+        <div class="art-layer" v-if="item.visible" v-for="(item, index) in tree" :key="item.index" :style="{
+          width: item.width + 'px',
+          height: item.height + 'px',
+          left: item.left + 'px',
+          top: item.top + 'px',
+          position: 'absolute',
+          zIndex: tree.length - index}" @click.stop="chooseNow(item)" @mouseover.stop="moveNow(item)">
+
+        </div>
       </div>
     </div>
+    <!-- 右侧属性面板 -->
+    <transition name="custom-classes-transition" enter-active-class="animated bounceInRight" leave-active-class="animated bounceOutRight">
+      <div class="panel panel-active" id="panel" v-if="markShow" @click.stop="panelClick">
+        <dl class="pa-block"><dt><h2>{{clickData.name}}</h2></dt></dl>
+        <dl class="pa-block"><dt><span>Position &amp; Size</span></dt><dd>
+            <ul>
+              <li><input :value="clickData.left + 'px'" readonly=""><label>X</label></li>
+              <li><input :value="clickData.top + 'px'" readonly=""><label>Y</label></li>
+              <li><input :value="clickData.width + 'px'" readonly=""><label>Width</label></li>
+              <li><input :value="clickData.height + 'px'" readonly=""><label>Height</label></li>
+            </ul>
+          </dd>
+        </dl>
+        <dl class="pa-block" v-if="clickData.text && clickData.text.font"><dt><span>Content</span><em>Copy Success</em></dt><dd><textarea name="content" style="height: 19px;">{{clickData.name}}</textarea></dd>
+        </dl>
+        <dl class="pa-block" v-if="clickData.text && clickData.text.font"><dt><span>Font Size</span><em>Copy Success</em></dt><dd><textarea
+              name="fontSize" style="height: 19px;">14px</textarea></dd>
+        </dl>
+        <dl class="pa-block"><dt><span>Code</span><em>Copy Success</em></dt><dd><textarea name="code" style="height: 110px;"
+              :value="showCode"></textarea></dd>
+        </dl>
+      </div>
+    </transition>
+    <Loading v-if="showLoad"></Loading>
   </div>
 </template>
 
 <script>
   import Vue from 'vue'
-  import TreeMenu from './TreeMenu.vue'
+  import Loading from './Loading.vue'
   import '../style/main.less'
+  
   export default {
     name: 'Hello',
     props: {
@@ -78,6 +106,7 @@
     },
     data() {
       return {
+        showLoad: true,
         spaceNum: 0,
         tree: [], // psdjs解析出来的数据
         previewDocument: '', // 解析的图片宽高属性集合
@@ -94,30 +123,56 @@
       }
     },
     components: {
-      TreeMenu
+      Loading
+    },
+    computed: {
+      /**
+       * 显示code
+       */
+      showCode() {
+        let code = ''
+        if (this.clickData.text && this.clickData.text.font) {
+          let opacity = this.clickData.text.font.colors[0].pop() / 255
+          code += ('font-family: ' + this.clickData.text.font.name + '\r\n'
+            + 'font-size: ' + this.clickData.text.font.sizes[0] + 'px\r\n'
+            + 'color: rgba(' + this.clickData.text.font.colors[0] + ',' + opacity + ')\r\n')
+        } else {
+          code += ('width: ' + this.clickData.width + 'px\r\n'
+            + 'height: ' + this.clickData.height + 'px\r\n'
+          )
+        }
+        if (this.clickData.opacity < 1) {
+          code += ('opacity: ' + this.clickData.opacity + '\r\n')
+        }
+
+        return code
+      }
     },
     mounted() {
       console.warn('获取数据')
       document.body.addEventListener('click', this.bodyListener, false)
       Vue.axios.get('http://localhost:3000/getPsdJson', {
         params: {
-          id: 'test3.psd'
+          id: 'test6.psd'
         }
       }).then((response) => {
         console.log(response.data)
+        this.showLoad = false
         this.previewUrl = response.data.preview
         this.previewDocument = response.data.tree.document
 
         this.traversalPsdTree(response.data.tree.children, 1)
         console.warn('this.tree==', this.tree)
+      }).catch(() => {
+
       })
     },
     beforeDestroy() {
       document.body.removeEventListener('click', this.bodyListener)
     },
     methods: {
-      bodyListener() {
-        console.error('object')
+      bodyListener(evt) {
+        console.error('object',evt)
         this.markShow = false
       },
       /**
@@ -344,6 +399,12 @@
         return num < 0 ? parseInt(Math.abs(num), 10) : parseInt(num, 10);
       },
       /**
+       * 右侧属性面板点击
+       */
+      panelClick() {
+        
+      },
+      /**
        * psdTree扁平化方法
        *
        */
@@ -368,7 +429,7 @@
               let next = floor + 1
               this.traversalPsdTree(node.children, next)
             } else {
-              console.log(spaceStr + 'floor : ' + floor + '   node  : ' + i + ' ' + node.type)
+              // console.log(spaceStr + 'floor : ' + floor + '   node  : ' + i + ' ' + node.type)
               this.tree.push(node)
             }
           }
@@ -404,9 +465,3 @@
     }
   }
 </script>
-
-<style scoped lang="less">
-  * {
-    box-sizing: border-box;
-  }
-</style>
