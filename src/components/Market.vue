@@ -88,6 +88,15 @@
         <dl class="pa-block"><dt><span>Code</span><em>Copy Success</em></dt><dd><textarea name="code" style="height: 110px;"
               :value="showCode"></textarea></dd>
         </dl>
+        <dl class="pa-block pa-export" v-if="!(clickData.text && clickData.text.font)"><dt><span>Export</span></dt><dd>
+            <ul>
+              <li><label>Size</label><select name="size"><option select="" value="1x">1x</option></select></li>
+              <li><label>Format</label><select name="format"><option value="png">png</option></select></li>
+            </ul>
+            <div class="export-btn"><a id="export-btn" target="_blank" :href="layerDir + clickData.name + '.png'" :download="clickData.name + '.png'" data-base="982C7C37-8BDE-4866-8316-09B03A2CA13A/43232933-2667-4A6E-B336-BFB3CC9F3619"
+                class="panel-export">Export Activity Layer</a></div>
+          </dd>
+        </dl>
       </div>
     </transition>
     <Loading v-if="showLoad"></Loading>
@@ -162,14 +171,14 @@
             id: url
           }
         }).then((response) => {
-          console.log(response.data)
           this.showLoad = false
-          this.previewUrl = response.data.preview
+          this.previewUrl = response.data.preview // 预览图
+          this.layerDir = response.data.layerDir // 切图url前缀
           this.previewDocument = response.data.tree.document
           // 数据扁平化
           this.traversalPsdTree(response.data.tree.children, 1)
-          console.warn(Object.keys(this.tree),this.tree)
-          this.tree.forEach((item)=>{
+          console.warn(Object.keys(this.tree), this.tree)
+          this.tree.forEach((item) => {
             //console.warn('object',item.type);
             /* if (!(item.text && item.text.font)) {
               item.width = item.width - 3
@@ -179,7 +188,7 @@
             } */
 
           })
-          
+
         }).catch(() => {
           // 参数错误页面
           this.noPage = true
@@ -190,7 +199,7 @@
         this.noPage = true
         this.showLoad = false
       }
-      
+
     },
     beforeDestroy() {
       document.body.removeEventListener('click', this.bodyListener)
@@ -490,7 +499,7 @@
   }
 </script>
 <style>
-  .no-page{
+  .no-page {
     margin-top: 100px;
   }
 </style>
