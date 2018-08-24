@@ -1,7 +1,6 @@
 <template>
   <div class="artboard">
-    <div class="wrap ">
-      <h1>{{ msg }}-{{markShow}}</h1>
+    <div class="wrap" v-if="!noPage">
       <!-- 预览图显示 宽度多加右侧属性面板宽度 -->
       <div class="wrap-layer" :style="{
         width: previewDocument.width + 220 + 'px',
@@ -80,7 +79,8 @@
             </ul>
           </dd>
         </dl>
-        <dl class="pa-block" v-if="clickData.text && clickData.text.font"><dt><span>Content</span><em>Copy Success</em></dt><dd><textarea name="content" style="height: 19px;">{{clickData.name}}</textarea></dd>
+        <dl class="pa-block" v-if="clickData.text && clickData.text.font"><dt><span>Content</span><em>Copy Success</em></dt><dd><textarea
+              name="content" style="height: 19px;">{{clickData.name}}</textarea></dd>
         </dl>
         <dl class="pa-block" v-if="clickData.text && clickData.text.font"><dt><span>Font Size</span><em>Copy Success</em></dt><dd><textarea
               name="fontSize" style="height: 19px;">14px</textarea></dd>
@@ -91,6 +91,7 @@
       </div>
     </transition>
     <Loading v-if="showLoad"></Loading>
+    <div class="no-page" v-if="noPage">无页面信息，参数错误</div>
   </div>
 </template>
 
@@ -98,7 +99,7 @@
   import Vue from 'vue'
   import Loading from './Loading.vue'
   import '../style/main.less'
-  
+
   export default {
     name: 'Hello',
     props: {
@@ -106,7 +107,8 @@
     },
     data() {
       return {
-        showLoad: true,
+        showLoad: true, // 是否显示loading
+        noPage: false, //页面参数错误
         spaceNum: 0,
         tree: [], // psdjs解析出来的数据
         previewDocument: '', // 解析的图片宽高属性集合
@@ -136,6 +138,7 @@
           code += ('font-family: ' + this.clickData.text.font.name + '\r\n'
             + 'font-size: ' + this.clickData.text.font.sizes[0] + 'px\r\n'
             + 'color: rgba(' + this.clickData.text.font.colors[0] + ',' + opacity + ')\r\n')
+            + 'text-align: ' + this.clickData.text.font.alignment[0] + '\r\n'
         } else {
           code += ('width: ' + this.clickData.width + 'px\r\n'
             + 'height: ' + this.clickData.height + 'px\r\n'
@@ -149,43 +152,64 @@
       }
     },
     mounted() {
-      console.warn('获取数据')
-      document.body.addEventListener('click', this.bodyListener, false)
-      Vue.axios.get('http://localhost:3000/getPsdJson', {
-        params: {
-          id: 'test6.psd'
-        }
-      }).then((response) => {
-        console.log(response.data)
+      let url = this.$route.query.url
+      let preview = this.$route.query.preview
+      console.warn('获取数据', url, preview)
+      if (url && preview) {
+        document.body.addEventListener('click', this.bodyListener, false)
+        Vue.axios.get('http://localhost:3000/getPsdJson', {
+          params: {
+            id: url
+          }
+        }).then((response) => {
+          console.log(response.data)
+          this.showLoad = false
+          this.previewUrl = response.data.preview
+          this.previewDocument = response.data.tree.document
+          // 数据扁平化
+          this.traversalPsdTree(response.data.tree.children, 1)
+          console.warn(Object.keys(this.tree),this.tree)
+          this.tree.forEach((item)=>{
+            //console.warn('object',item.type);
+            /* if (!(item.text && item.text.font)) {
+              item.width = item.width - 3
+              item.height = item.height - 3
+              item.left = item.left + 1
+              item.top = item.top + 1
+            } */
+
+          })
+          
+        }).catch(() => {
+          // 参数错误页面
+          this.noPage = true
+          this.showLoad = false
+        })
+      } else {
+        // 参数错误页面
+        this.noPage = true
         this.showLoad = false
-        this.previewUrl = response.data.preview
-        this.previewDocument = response.data.tree.document
-
-        this.traversalPsdTree(response.data.tree.children, 1)
-        console.warn('this.tree==', this.tree)
-      }).catch(() => {
-
-      })
+      }
+      
     },
     beforeDestroy() {
       document.body.removeEventListener('click', this.bodyListener)
     },
     methods: {
       bodyListener(evt) {
-        console.error('object',evt)
+        console.error('object', evt)
         this.markShow = false
       },
       /**
        * 鼠标移动到的图层 
        */
       moveNow(data) {
-        console.info('moveNow', data)
         // 是否有点击选中
         if (Object.keys(this.clickData).length === 0) {
           return
         }
         const isDiff = this.diff(data, this.clickData)
-        console.log('isDiff', isDiff)
+        //console.log('isDiff', isDiff)
         if (isDiff) {
           this.moveData = {}
         } else {
@@ -195,7 +219,7 @@
           }
           this.showRuler()
         }
-        console.log(this.moveData)
+        //console.log(this.moveData)
       },
       /**
        * 当前选中图层
@@ -402,7 +426,7 @@
        * 右侧属性面板点击
        */
       panelClick() {
-        
+
       },
       /**
        * psdTree扁平化方法
@@ -465,3 +489,8 @@
     }
   }
 </script>
+<style>
+  .no-page{
+    margin-top: 100px;
+  }
+</style>
