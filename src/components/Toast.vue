@@ -42,53 +42,52 @@
 
 </script>
 <style lang="less">
-  .toast {
-    position: fixed;
-    left: 50%;
-    -webkit-transform: translate(-50%, -50%) scale(1);
-    -ms-transform: translate(-50%, -50%) scale(1);
-    -o-transform: translate(-50%, -50%) scale(1);
-    transform: translate(-50%, -50%) scale(1);
-    word-wrap: break-word;
-    padding: 10px;
-    text-align: center;
-    z-index: 10002;
-    font-size: .3rem;
-    max-width: 80%;
+.toast {
+  position: fixed;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%) scale(1);
+  -ms-transform: translate(-50%, -50%) scale(1);
+  -o-transform: translate(-50%, -50%) scale(1);
+  transform: translate(-50%, -50%) scale(1);
+  word-wrap: break-word;
+  padding: 10px;
+  text-align: center;
+  z-index: 10002;
+  font-size: 0.3rem;
+  max-width: 80%;
+  color: #fff;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  i {
     color: #fff;
-    border-radius: 5px;
-    background: rgba(0, 0, 0, 0.7);
-    overflow: hidden;
-    i {
-      color: #fff;
-    }
   }
+}
 
-  .toast.middle {
-    top: 50%;
-  }
+.toast.middle {
+  top: 50%;
+}
 
-  .toast.top {
-    top: 10%;
-  }
+.toast.top {
+  top: 10%;
+}
 
-  .toast.bottom {
-    top: 90%;
-  }
+.toast.bottom {
+  top: 90%;
+}
 
-  .fade-enter-active,
-  .fade-leave-active {
-    -webkit-transition: transform 0.5s;
-    -o-transition: transform 0.5s;
-    transition: transform 0.5s;
+.fade-enter-active,
+.fade-leave-active {
+  -webkit-transition: transform 0.5s;
+  -o-transition: transform 0.5s;
+  transition: transform 0.5s;
+}
 
-  }
-
-  .fade-enter,
-  .fade-leave-active {
-    -webkit-transform: translate(-50%, -50%) scale(0);
-    -ms-transform: translate(-50%, -50%) scale(0);
-    -o-transform: translate(-50%, -50%) scale(0);
-    transform: translate(-50%, -50%) scale(0);
-  }
+.fade-enter,
+.fade-leave-active {
+  -webkit-transform: translate(-50%, -50%) scale(0);
+  -ms-transform: translate(-50%, -50%) scale(0);
+  -o-transform: translate(-50%, -50%) scale(0);
+  transform: translate(-50%, -50%) scale(0);
+}
 </style>
