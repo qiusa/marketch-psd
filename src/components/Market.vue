@@ -114,16 +114,36 @@
             <em>Copy Success</em>
           </dt>
           <dd>
-            <textarea name="content" style="height: 19px;">{{clickData.name}}</textarea>
+            <textarea name="content" style="height: 19px;" v-html="clickData.name"></textarea>
           </dd>
         </dl>
-        <dl class="pa-block" v-if="clickData.text && clickData.text.font">
+        <dl class="pa-block" v-if="clickData.InnerShadow">
           <dt>
-            <span>Font Size</span>
+            <span>内阴影</span>
             <em>Copy Success</em>
           </dt>
           <dd>
-            <textarea name="fontSize" style="height: 19px;">14px</textarea>
+            <ul>
+              <li><input :value="clickData.InnerShadow.offset.distance" readonly="">
+                <label>距离</label>
+              </li>
+              <li><input :value="clickData.InnerShadow.offset.extra" readonly="">
+                <label>扩展</label>
+              </li>
+              <li><input :value="clickData.InnerShadow.Effect" readonly="">
+                <label>大小</label>
+              </li>
+            </ul>
+          </dd>
+        </dl>
+        <dl class="pa-inline pa-fill" v-if="clickData.InnerShadow">
+          <dt>
+            <span>内阴影颜色</span>
+          </dt>
+          <dd>
+            <p>{{clickData.InnerShadow.color}}
+              <span :style="{backgroundColor: clickData.InnerShadow.color}"></span>
+            </p>
           </dd>
         </dl>
         <dl class="pa-block">
@@ -206,7 +226,6 @@ export default {
     showCode() {
       let code = ''
       if (this.clickData.text && this.clickData.text.font) {
-        let opacity = this.clickData.text.font.colors[0].pop() / 255
         code +=
           'font-family: ' +
           this.clickData.text.font.name +
@@ -214,11 +233,9 @@ export default {
           'font-size: ' +
           this.clickData.text.font.sizes[0] +
           'px\r\n' +
-          'color: rgba(' +
-          this.clickData.text.font.colors[0] +
-          ',' +
-          opacity +
-          ')\r\n' +
+          'color: ' +
+          this.rgba2color(this.clickData.text.font.colors[0]) +
+          '\r\n' +
           'text-align: ' +
           this.clickData.text.font.alignment[0] +
           '\r\n'
@@ -234,7 +251,12 @@ export default {
       if (this.clickData.opacity < 1) {
         code += 'opacity: ' + this.clickData.opacity + '\r\n'
       }
-
+      if (this.clickData.border) {
+        code += 'border: ' + this.clickData.border + '\r\n'
+      }
+      if (this.clickData.boxShadow) {
+        code += 'box-shadow: ' + this.clickData.boxShadow.style + '\r\n'
+      }
       return code
     }
   },
@@ -254,9 +276,10 @@ export default {
           this.showLoad = false
           this.previewUrl = response.data.preview // 预览图
           this.layerDir = response.data.layerDir // 切图url前缀
-          this.previewDocument = response.data.tree.document
+          this.previewDocument = response.data.document
           // 数据扁平化
-          this.traversalPsdTree(response.data.tree.children, 1)
+          //this.traversalPsdTree(response.data.tree.children, 1)
+          this.tree = response.data.tree
           console.warn(Object.keys(this.tree), this.tree)
           this.tree.forEach(item => {
             //console.warn('object',item.type);
@@ -543,7 +566,10 @@ export default {
             let next = floor + 1
             this.traversalPsdTree(node.children, next)
           } else {
-            // console.log(spaceStr + 'floor : ' + floor + '   node  : ' + i + ' ' + node.type)
+            console.log(
+              spaceStr + 'floor : ' + floor + '   node  : ' + i + ' ',
+              node
+            )
             this.tree.push(node)
           }
         }
@@ -576,6 +602,28 @@ export default {
         }
       }
       return true
+    },
+    /**
+     * 将 RGBA 转换成颜色表达式
+     *
+     * @param {Array[4]} value rgba 值
+     * @return {string} 返回颜色表达式
+     */
+    rgba2color(value) {
+      if (value[3] === 255) {
+        return (
+          '#' +
+          value
+            .slice(0, -1)
+            .map(function(value) {
+              return (0x100 + parseInt(value)).toString(16).slice(1)
+            })
+            .join('')
+            .replace(/(.)\1(.)\2(.)\3/, '$1$2$3')
+        )
+      } else {
+        return 'rgba(' + value.join() + ')'
+      }
     }
   }
 }
