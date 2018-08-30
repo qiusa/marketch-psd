@@ -155,7 +155,7 @@
             <textarea name="code" style="height: 110px;" :value="showCode"></textarea>
           </dd>
         </dl>
-        <dl class="pa-block pa-export" v-if="!(clickData.text && clickData.text.font)">
+        <dl class="pa-block pa-export" v-if="!(clickData.text && clickData.text.font) && false">
           <dt>
             <span>Export</span>
           </dt>
@@ -183,6 +183,7 @@
     </transition>
     <Loading v-if="showLoad"></Loading>
     <div class="no-page" v-if="noPage">无页面信息，参数错误</div>
+    <iframe name="myIframe" id="myIframe" style="display:none"></iframe>
   </div>
 </template>
 
@@ -198,6 +199,10 @@ export default {
   },
   data() {
     return {
+      url: {
+        exportImg: 'http://127.0.0.1:3000/exportImg',
+        getPsdJson: 'http://127.0.0.1:3000/getPsdJson'
+      },
       showLoad: true, // 是否显示loading
       noPage: false, //页面参数错误
       spaceNum: 0,
@@ -267,29 +272,24 @@ export default {
     if (url && preview) {
       document.body.addEventListener('click', this.bodyListener, false)
       Vue.axios
-        .get('http://localhost:3000/getPsdJson', {
+        .get(this.url.getPsdJson, {
           params: {
             id: url
           }
         })
         .then(response => {
-          this.showLoad = false
-          this.previewUrl = response.data.preview // 预览图
-          this.layerDir = response.data.layerDir // 切图url前缀
-          this.previewDocument = response.data.document
-          // 数据扁平化
-          //this.traversalPsdTree(response.data.tree.children, 1)
-          this.tree = response.data.tree
-          console.warn(Object.keys(this.tree), this.tree)
-          this.tree.forEach(item => {
-            //console.warn('object',item.type);
-            /* if (!(item.text && item.text.font)) {
-              item.width = item.width - 3
-              item.height = item.height - 3
-              item.left = item.left + 1
-              item.top = item.top + 1
-            } */
-          })
+          if (response.data.code === 200) {
+            this.showLoad = false
+            this.previewUrl = response.data.data.preview // 预览图
+            this.layerDir = response.data.data.layerDir // 切图url前缀
+            this.previewDocument = response.data.data.document
+            this.tree = response.data.data.tree
+            console.warn(Object.keys(this.tree), this.tree)
+          } else {
+            // 参数错误页面
+            this.noPage = true
+            this.showLoad = false
+          }
         })
         .catch(() => {
           // 参数错误页面
@@ -536,6 +536,34 @@ export default {
     },
     validateNum: function(num) {
       return num < 0 ? parseInt(Math.abs(num), 10) : parseInt(num, 10)
+    },
+    /**
+     * 导出图层
+     */
+    exportLayer() {
+      let url = this.$route.query.url
+      let preview = this.$route.query.preview
+      console.error('object,', url, preview)
+      if (url && preview) {
+        Vue.axios
+          .post(this.url.exportImg, {
+            id: url,
+            name: this.clickData.name,
+            path: this.clickData.path
+          })
+          .then(response => {
+            if (response.data.code === 200) {
+              window.open(response.data.data.url, 'myIframe')
+            } else {
+              alert('下载图层失败')
+            }
+          })
+          .catch(() => {})
+      } else {
+        // 参数错误页面
+        this.noPage = true
+        this.showLoad = false
+      }
     },
     /**
      * 右侧属性面板点击
